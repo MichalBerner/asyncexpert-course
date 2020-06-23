@@ -5,6 +5,7 @@ using BenchmarkDotNet.Diagnostics.Windows.Configs;
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
 	[DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
+	[MemoryDiagnoser]
 	[NativeMemoryProfiler]
 	public class FibonacciCalc
 	{
@@ -15,6 +16,12 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 		// 4. Open disassembler report and compare machine code
 		// 
 		// You can use the discussion panel to compare your results with other students
+
+		private readonly Dictionary<ulong, ulong> _results = new Dictionary<ulong, ulong>()
+		{
+			[1] = 1,
+			[2] = 1
+		};
 
 		[Benchmark(Baseline = true)]
 		[ArgumentsSource(nameof(Data))]
@@ -28,7 +35,13 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 		[ArgumentsSource(nameof(Data))]
 		public ulong RecursiveWithMemoization(ulong n)
 		{
-			return 0;
+			if (!_results.TryGetValue(n, out var result))
+			{
+				result = RecursiveWithMemoization(n - 2) + RecursiveWithMemoization(n - 1);
+				_results.Add(n, result);
+			}
+			
+			return result;
 		}
 		
 		[Benchmark]
@@ -56,8 +69,9 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 
 		public IEnumerable<ulong> Data()
 		{
-			yield return 1;
-			yield return 2;
+			yield return 10;
+			yield return 20;
+			yield return 30;
 		}
 	}
 }
