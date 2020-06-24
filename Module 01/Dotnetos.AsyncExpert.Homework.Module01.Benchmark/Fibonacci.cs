@@ -69,9 +69,8 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 
 		public IEnumerable<ulong> Data()
 		{
-			yield return 10;
-			yield return 20;
-			yield return 30;
+			yield return 15;
+			yield return 35;
 		}
 	}
 }
