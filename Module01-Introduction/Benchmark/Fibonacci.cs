@@ -3,8 +3,8 @@ using BenchmarkDotNet.Attributes;
 
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
-	[DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
-	[MemoryDiagnoser]
+    [DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
+    [MemoryDiagnoser]
     public class FibonacciCalc
     {
         // HOMEWORK:
@@ -15,11 +15,11 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
         // 
         // You can use the discussion panel to compare your results with other students
 
-		private readonly Dictionary<ulong, ulong> _results = new Dictionary<ulong, ulong>()
-		{
-			[1] = 1,
-			[2] = 1
-		};
+        private readonly Dictionary<ulong, ulong> _results = new Dictionary<ulong, ulong>()
+        {
+            [1] = 1,
+            [2] = 1
+        };
 
         [Benchmark(Baseline = true)]
         [ArgumentsSource(nameof(Data))]
@@ -33,36 +33,36 @@ namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
         [ArgumentsSource(nameof(Data))]
         public ulong RecursiveWithMemoization(ulong n)
         {
-			if (!_results.TryGetValue(n, out var result))
-			{
-				result = RecursiveWithMemoization(n - 2) + RecursiveWithMemoization(n - 1);
-				_results.Add(n, result);
-			}
-			
-			return result;
-	    }
+            if (!_results.TryGetValue(n, out var result))
+            {
+                result = RecursiveWithMemoization(n - 2) + RecursiveWithMemoization(n - 1);
+                _results.Add(n, result);
+            }
+            
+            return result;
+        }
         
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public ulong Iterative(ulong n)
         {
-			if (n == 1 || n == 2)
-			{
-				return 1;
-			}
+            if (n == 1 || n == 2)
+            {
+                return 1;
+            }
 
-			var previous = 1ul;
-			var beforePrevious = 1ul;
-			var current = 0ul;
+            var previous = 1ul;
+            var beforePrevious = 1ul;
+            var current = 0ul;
 
-			for (ulong i = 3; i <= n; i++)
-			{
-				current = previous + beforePrevious;
-				beforePrevious = previous;
-				previous = current;
-			}
+            for (ulong i = 3; i <= n; i++)
+            {
+                current = previous + beforePrevious;
+                beforePrevious = previous;
+                previous = current;
+            }
 
-			return current;
+            return current;
         }
 
         public IEnumerable<ulong> Data()
