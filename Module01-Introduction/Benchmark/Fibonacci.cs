@@ -4,6 +4,7 @@ using BenchmarkDotNet.Attributes;
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
 	[DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
+	[MemoryDiagnoser]
     public class FibonacciCalc
     {
         // HOMEWORK:
