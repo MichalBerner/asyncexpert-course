@@ -33,12 +33,7 @@ namespace ThreadPoolExercises.Core
 		{
 			try
 			{
-				if (repeats == 0)
-				{
-					return;
-				}
-
-				for (int i = 0; i < repeats; i++)
+				for (var i = 0; i < repeats; i++)
 				{
 					token.ThrowIfCancellationRequested();
 					action.Invoke();
