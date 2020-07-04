@@ -25,27 +25,28 @@ namespace ThreadPoolExercises.Core
 			// * If an `action` throws and exception (or token has been cancelled) - `errorAction` should be invoked (if provided)
 
 			var autoResetEvent = new AutoResetEvent(false);
-			ThreadPool.QueueUserWorkItem(o => ExecuteWithExceptionHandling(action, repeats, token, errorAction, autoResetEvent));
+			ThreadPool.QueueUserWorkItem(o =>
+			{
+				ExecuteWithExceptionHandling(action, repeats, token, errorAction);
+				autoResetEvent.Set();
+			});
+
 			autoResetEvent.WaitOne();
 		}
 
-		private static void ExecuteWithExceptionHandling(Action action, int repeats, CancellationToken token = default, Action<Exception>? errorAction = null, AutoResetEvent? autoResetEvent = null)
+		private static void ExecuteWithExceptionHandling(Action action, int repeats, CancellationToken token = default, Action<Exception>? errorAction = null)
 		{
 			try
 			{
 				for (var i = 0; i < repeats; i++)
 				{
 					token.ThrowIfCancellationRequested();
-					action.Invoke();
+					action?.Invoke();
 				}
 			}
 			catch (Exception e)
 			{
 				errorAction?.Invoke(e);
-			}
-			finally
-			{
-				autoResetEvent?.Set();
 			}
 		}
 	}
