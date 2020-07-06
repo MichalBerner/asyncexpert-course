@@ -3,72 +3,80 @@ using BenchmarkDotNet.Attributes;
 
 namespace Dotnetos.AsyncExpert.Homework.Module01.Benchmark
 {
-    [DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
-    [MemoryDiagnoser]
-    public class FibonacciCalc
-    {
-        // HOMEWORK:
-        // 1. Write implementations for RecursiveWithMemoization and Iterative solutions
-        // 2. Add MemoryDiagnoser to the benchmark
-        // 3. Run with release configuration and compare results
-        // 4. Open disassembler report and compare machine code
-        // 
-        // You can use the discussion panel to compare your results with other students
+	[DisassemblyDiagnoser(exportCombinedDisassemblyReport: true)]
+	[MemoryDiagnoser]
+	public class FibonacciCalc
+	{
+		// HOMEWORK:
+		// 1. Write implementations for RecursiveWithMemoization and Iterative solutions
+		// 2. Add MemoryDiagnoser to the benchmark
+		// 3. Run with release configuration and compare results
+		// 4. Open disassembler report and compare machine code
+		// 
+		// You can use the discussion panel to compare your results with other students
 
-        private readonly Dictionary<ulong, ulong> _results = new Dictionary<ulong, ulong>()
-        {
-            [1] = 1,
-            [2] = 1
-        };
+		[Benchmark(Baseline = true)]
+		[ArgumentsSource(nameof(Data))]
+		public ulong Recursive(ulong n)
+		{
+			if (n == 1 || n == 2) return 1;
 
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public ulong Recursive(ulong n)
-        {
-            if (n == 1 || n == 2) return 1;
-            return Recursive(n - 2) + Recursive(n - 1);
-        }
+			return Recursive(n - 2) + Recursive(n - 1);
+		}
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public ulong RecursiveWithMemoization(ulong n)
-        {
-            if (!_results.TryGetValue(n, out var result))
-            {
-                result = RecursiveWithMemoization(n - 2) + RecursiveWithMemoization(n - 1);
-                _results.Add(n, result);
-            }
-            
-            return result;
-        }
-        
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public ulong Iterative(ulong n)
-        {
-            if (n == 1 || n == 2)
-            {
-                return 1;
-            }
+		[Benchmark]
+		[ArgumentsSource(nameof(Data))]
+		public ulong RecursiveWithMemoization(ulong n)
+		{
+			ulong RecursiveWithMemoizationInternal(ulong m, ulong[] resultsInternal)
+			{
+				if (resultsInternal[m] == 0)
+				{
+					var result = RecursiveWithMemoizationInternal(m - 2, resultsInternal) + RecursiveWithMemoizationInternal(m - 1, resultsInternal);
+					resultsInternal[m] = result;
+				}
 
-            var previous = 1ul;
-            var beforePrevious = 1ul;
-            var current = 0ul;
+				return resultsInternal[m];
+			}
 
-            for (ulong i = 3; i <= n; i++)
-            {
-                current = previous + beforePrevious;
-                beforePrevious = previous;
-                previous = current;
-            }
+			if (n == 1 || n == 2)
+			{
+				return 1;
+			}
 
-            return current;
-        }
+			var results = new ulong[n];
+			results[0] = results[1] = 1;
 
-        public IEnumerable<ulong> Data()
-        {
-            yield return 15;
-            yield return 35;
-        }
-    }
+			return RecursiveWithMemoizationInternal(n - 1, results);
+		}
+
+		[Benchmark]
+		[ArgumentsSource(nameof(Data))]
+		public ulong Iterative(ulong n)
+		{
+			if (n == 1 || n == 2)
+			{
+				return 1;
+			}
+
+			var previous = 1ul;
+			var beforePrevious = 1ul;
+			var current = 0ul;
+
+			for (ulong i = 3; i <= n; i++)
+			{
+				current = previous + beforePrevious;
+				beforePrevious = previous;
+				previous = current;
+			}
+
+			return current;
+		}
+
+		public IEnumerable<ulong> Data()
+		{
+			yield return 15;
+			yield return 35;
+		}
+	}
 }
