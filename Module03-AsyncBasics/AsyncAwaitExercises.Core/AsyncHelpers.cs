@@ -9,7 +9,6 @@ namespace AsyncAwaitExercises.Core
 	public class AsyncHelpers
 	{
 		private const int MinTries = 2;
-		private const int InitialDelay = 1000;
 
 		public static Task<string> GetStringWithRetries(HttpClient client, string url, int maxTries = 3, CancellationToken token = default)
 		{
