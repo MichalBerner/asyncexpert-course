@@ -9,6 +9,11 @@ namespace AwaitableExercises.Core
 		{
 			return new BoolAwaiter(value);
 		}
+
+		//public static TaskAwaiter<bool> GetAwaiter(this bool value)
+		//{
+		//	return Task.FromResult(value).GetAwaiter();
+		//}
 	}
 
 	public class BoolAwaiter : INotifyCompletion
