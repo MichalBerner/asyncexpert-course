@@ -12,6 +12,7 @@ namespace Synchronization.Core
 	public class NamedExclusiveScope : IDisposable
 	{ 
 		private readonly Mutex _mutex;
+		private readonly bool _mutexEntered;
 
 		public NamedExclusiveScope(string name, bool isSystemWide)
 		{
@@ -19,17 +20,20 @@ namespace Synchronization.Core
 			
 			if (!isCreatedNew)
 			{
-				_mutex = null;
 				throw new InvalidOperationException($"Unable to get a global lock {name}.");
 			}
 
-			_mutex.WaitOne();
+		 	_mutexEntered = _mutex.WaitOne();
 		}
 
 		public void Dispose()
 		{
-			_mutex?.ReleaseMutex();
-			_mutex?.Dispose();
+			if (_mutexEntered)
+			{
+				_mutex.ReleaseMutex();
+			}
+			
+			_mutex.Dispose();
 		}
 	}
 }
