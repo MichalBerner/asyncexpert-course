@@ -1,29 +1,58 @@
-﻿using System.Numerics;
-using System.Threading;
+﻿using System.Threading;
 
 namespace LowLevelExercises.Core
 {
 	/// <summary>
 	/// A simple class for reporting a specific value and obtaining an average.
 	/// </summary>
-	/// TODO: remove the locking and use <see cref="Interlocked"/> and <see cref="Volatile"/> to implement a lock-free implementation.
 	public class AverageMetric
 	{
-		private volatile int _sum = 0;
-		private volatile int _count = 0;
+		private int _sum = 0;
+		private int _count = 0;
+		private int _isWorking;
 
 		public void Report(int value)
 		{
-			Interlocked.Add(ref _sum, value);
-			Interlocked.Increment(ref _count);
+			var spinner = new SpinWait();
+			
+			while (true)
+			{
+				if (Interlocked.CompareExchange(ref _isWorking, 1, 0) == 0)
+				{
+					_sum += value;
+					Volatile.Write(ref _count, _count + 1);
+					Interlocked.Exchange(ref _isWorking, 0);
+					
+					return;
+				}
+
+				spinner.SpinOnce();
+			}
 		}
 
-		public double Average => Calculate(_count, _sum);
+		public double Average
+		{
+			get
+			{
+				var spinner = new SpinWait();
+
+				while (true)
+				{
+					if (Interlocked.CompareExchange(ref _isWorking, 1, 0) == 0)
+					{
+						var calculationResult = Calculate(Volatile.Read(ref _count), _sum);
+						Interlocked.Exchange(ref _isWorking, 0);
+
+						return calculationResult;
+					}
+					
+					spinner.SpinOnce();
+				}
+			}
+		}
 
 		private static double Calculate(in int count, in int sum)
 		{
-			// DO NOT change the way calculation is done.
-
 			if (count == 0)
 			{
 				return double.NaN;
